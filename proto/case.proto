@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package case;
+
+message Case {
+  required int32 a = 1;
+  required int32 b = 2;
+  required float c = 3;
+  required float d = 4;
+  required string e = 5;
+  required string f = 6;
+}
+
+message CaseList {
+  repeated Case cases = 1;
+}
