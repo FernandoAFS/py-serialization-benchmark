@@ -5,6 +5,7 @@ import case_proto
 import msgpack
 import pytest
 from faker import Faker
+import pickle
 
 faker = Faker()
 
@@ -41,6 +42,7 @@ def rand_n_msg_factory(n: int):
 
     return caseList
 
+
 def rand_n_msg_factory_pyrobuf(n: int):
     caseList = case_proto.CaseList()
 
@@ -54,7 +56,6 @@ def rand_n_msg_factory_pyrobuf(n: int):
         case.f = faker.text()
 
     return caseList
-
 
 
 @pytest.mark.parametrize("N", ns)
@@ -71,6 +72,22 @@ def test_deserialize_json(benchmark, N):
     dicts = rand_n_dict_factory(N)
     json_deser = json.dumps(dicts)
     benchmark(lambda: json.loads(json_deser))
+
+
+@pytest.mark.parametrize("N", ns)
+def test_serialize_pickle(benchmark, N):
+    "Just try to create a single test struct"
+
+    dicts = rand_n_dict_factory(N)
+    benchmark(lambda: pickle.dumps(dicts))
+
+
+@pytest.mark.parametrize("N", ns)
+def test_deserialize_pickle(benchmark, N):
+    "Just try to create a single test struct"
+    dicts = rand_n_dict_factory(N)
+    json_deser = pickle.dumps(dicts)
+    benchmark(lambda: pickle.loads(json_deser))
 
 
 @pytest.mark.parametrize("N", ns)
@@ -100,9 +117,11 @@ def test_deserialize_pb(benchmark, N):
     "Just try to create a single test struct"
     msg = rand_n_msg_factory(N)
     serial = msg.SerializeToString()
+
     def deserial():
         cases = case_pb2.CaseList()
         cases.ParseFromString(serial)
+
     benchmark(deserial)
 
 
@@ -116,7 +135,9 @@ def test_serialize_pyrobuf(benchmark, N):
 def test_deserialize_pyrobuf(benchmark, N):
     msg = rand_n_msg_factory_pyrobuf(N)
     serial = msg.SerializeToString()
+
     def deserial():
         cases = case_proto.CaseList()
         cases.ParseFromString(serial)
+
     benchmark(deserial)
